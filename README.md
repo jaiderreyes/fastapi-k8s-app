@@ -1,33 +1,45 @@
-# Mini Sistema Distribuido con FastAPI, Redis, PostgreSQL y Nginx
-#Creado Por Ingeniero Jaider Reyes Herazo
+# 🐳 FastAPI K8s App – Sistema Distribuido con Minikube
 
-Este proyecto demuestra un entorno distribuido usando **Minikube** y **Kubernetes**, con una arquitectura de microservicios que incluye:
-
-- `FastAPI` + `Uvicorn`: API Stateless
-- `Redis`: Caché y contador de hits
-- `PostgreSQL`: Persistencia
-- `Nginx`: Balanceador de carga
-- Soporte para escalabilidad horizontal y tolerancia a fallos
+Este proyecto implementa una arquitectura de microservicios distribuida usando **FastAPI**, **Redis**, **PostgreSQL**, y **Nginx**, desplegados sobre un clúster de **Kubernetes en Minikube**.
 
 ---
 
-## 📦 Estructura del Proyecto
+## 📦 Componentes del sistema
+
+| Componente   | Función                                                  |
+|--------------|----------------------------------------------------------|
+| FastAPI + Uvicorn | API stateless con endpoints `/` y `/db`              |
+| Redis        | Almacenamiento en caché y contador de visitas            |
+| PostgreSQL   | Base de datos para persistencia                          |
+| Nginx        | Balanceador de carga para múltiples réplicas             |
+
+---
+
+## 📁 Estructura del proyecto
 
 ```
-.
+fastapi_k8s_app/
 ├── app/
-│   └── main.py
-├── Dockerfile
-└── k8s/
-    ├── app.yaml
-    ├── postgres.yaml
-    ├── redis.yaml
-    └── nginx.yaml
+│   └── main.py                # Código de la API FastAPI
+├── k8s/
+│   ├── app.yaml               # Despliegue y servicio para FastAPI
+│   ├── redis.yaml             # Redis deployment + service
+│   ├── postgres.yaml          # PostgreSQL deployment + PVC + service
+│   └── nginx.yaml             # Configuración balanceador Nginx
+├── Dockerfile                 # Imagen personalizada para FastAPI
+├── build_and_reload.sh        # Script de despliegue sin Docker Desktop
+└── README.md                  # Este archivo
 ```
 
 ---
 
-## 🚀 Despliegue Paso a Paso
+## 🚀 Cómo desplegar
+
+### Requisitos:
+
+- [ ] Docker Desktop (opcional)
+- [x] Minikube
+- [x] kubectl
 
 ### 1. Inicia Minikube
 
@@ -35,31 +47,27 @@ Este proyecto demuestra un entorno distribuido usando **Minikube** y **Kubernete
 minikube start
 ```
 
-### 2. Usa Docker dentro de Minikube
+### 2. Construye la imagen dentro de Minikube
 
 ```bash
-eval $(minikube docker-env)
+minikube image build -t fastapi-app:latest .
 ```
 
-### 3. Construye la imagen personalizada de la API
+> 💡 Si usas Docker Desktop y no estás en entorno multinodo, puedes usar `docker build` + `minikube image load`.
 
-```bash
-docker build -t fastapi-app:latest .
-```
-
-### 4. Aplica los archivos YAML
+### 3. Despliega todos los servicios
 
 ```bash
 kubectl apply -f k8s/
 ```
 
-### 5. Verifica que los pods estén corriendo
+### 4. Verifica el estado de los pods
 
 ```bash
 kubectl get pods
 ```
 
-### 6. Accede al servicio Nginx (balanceador)
+### 5. Obtén la URL pública para acceder a la app
 
 ```bash
 minikube service nginx --url
@@ -67,14 +75,7 @@ minikube service nginx --url
 
 ---
 
-## ⚙️ Funcionalidad de la API
-
-- `GET /` → Devuelve un mensaje de bienvenida y contador de visitas desde Redis
-- `GET /db` → Verifica conectividad con PostgreSQL
-
----
-
-## 📈 Escalabilidad y Tolerancia a Fallos
+## 🔄 Escalabilidad y tolerancia a fallos
 
 ### Escalar horizontalmente:
 
@@ -82,21 +83,20 @@ minikube service nginx --url
 kubectl scale deployment fastapi-app --replicas=5
 ```
 
-### Simular fallo de réplica:
+### Simular caída de una réplica:
 
 ```bash
 kubectl delete pod <nombre-del-pod>
 ```
 
-Nginx seguirá respondiendo usando otras réplicas disponibles.
+Nginx seguirá balanceando entre las réplicas disponibles.
 
 ---
 
-## ✅ Requisitos
+## 📬 Endpoints disponibles
 
-- Docker
-- Minikube
-- kubectl
+- `GET /` → Retorna mensaje y contador de visitas desde Redis
+- `GET /db` → Verifica conexión con PostgreSQL
 
 ---
 
@@ -108,6 +108,13 @@ kubectl delete -f k8s/
 
 ---
 
-## 📚 Créditos
+## 👨‍💻 Autor
 
-Desarrollado como una demostración de arquitectura distribuida con Kubernetes.
+**Jaider Reyes** – DevOps & Cloud Enthusiast  
+GitHub: [@jaiderreyes](https://github.com/jaiderreyes)
+
+---
+
+## ⚖️ Licencia
+
+Este proyecto está bajo la licencia MIT.
