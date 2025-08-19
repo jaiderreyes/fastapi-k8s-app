@@ -1,5 +1,6 @@
-# 🐳 FastAPI K8s App – Sistema Distribuido con Minikube By Jaider Reyes Herazo
-![Arquitectura](./Fastapi.png)
+# 🐳 FastAPI K8s App – Sistema Distribuido con Minikube
+
+![Arquitectura del sistema](./A_flowchart_in_this_digital_illustration_illustrat.png)
 
 Este proyecto implementa una arquitectura de microservicios distribuida usando **FastAPI**, **Redis**, **PostgreSQL**, y **Nginx**, desplegados sobre un clúster de **Kubernetes en Minikube**.
 
@@ -108,6 +109,71 @@ kubectl delete -f k8s/
 ```
 
 ---
+
+
+---
+
+## 🛡️ Pruebas de Resiliencia
+
+Estas pruebas permiten validar la tolerancia a fallos y el comportamiento del sistema cuando ocurren interrupciones en los componentes críticos.
+
+### 🔧 Opción A – Simular caída de NGINX (Pod)
+
+Elimina el pod de NGINX manualmente:
+
+```bash
+kubectl delete pod -l app=nginx
+```
+
+Esto simula una falla inesperada. Kubernetes automáticamente levantará un nuevo pod gracias al Deployment.
+
+Monitorea su recreación:
+
+```bash
+kubectl get pods -l app=nginx -w
+```
+
+> ✅ Recomendado para probar auto-recuperación sin perder el recurso de servicio.
+
+---
+
+### 🔧 Opción B – Escalar NGINX a 0 (simular mantenimiento)
+
+```bash
+kubectl scale deployment nginx --replicas=0
+```
+
+Para restaurar el servicio:
+
+```bash
+kubectl scale deployment nginx --replicas=1
+```
+
+> 🔁 Útil para mantenimiento controlado o despliegues sin tráfico.
+
+---
+
+### ❌ Opción NO recomendada – Eliminar el servicio de NGINX
+
+```bash
+kubectl delete svc nginx
+```
+
+> ⚠️ Esto elimina el balanceador de carga y la URL pública de Minikube dejará de funcionar. Solo usar si deseas reconfigurar el servicio desde cero.
+
+---
+
+### 🧪 Recomendaciones
+
+- Realiza las pruebas con múltiples réplicas de `fastapi-app` activas.
+- Verifica que la API sigue respondiendo tras la recuperación.
+- Usa herramientas como `curl` o un navegador para observar interrupciones mínimas.
+- Monitorea los pods en tiempo real para observar la auto-recuperación.
+
+```bash
+kubectl get pods -w
+```
+
 
 ## 👨‍💻 Autor
 
