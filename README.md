@@ -1,6 +1,6 @@
 # 🐳 FastAPI K8s App – Sistema Distribuido con Minikube
 
-![Arquitectura del sistema](./A_flowchart_in_this_digital_illustration_illustrat.png)
+![Arquitectura del sistema](./Fastapi.png)
 
 Este proyecto implementa una arquitectura de microservicios distribuida usando **FastAPI**, **Redis**, **PostgreSQL**, y **Nginx**, desplegados sobre un clúster de **Kubernetes en Minikube**.
 
